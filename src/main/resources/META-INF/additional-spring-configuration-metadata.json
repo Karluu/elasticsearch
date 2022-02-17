@@ -1,0 +1,205 @@
+{
+  "groups": [
+    {
+      "name": "elasticsearch",
+      "type": "cn.gf.elasticsearch.autoconfigure.ElasticsearchProperties",
+      "sourceType": "cn.gf.elasticsearch.autoconfigure.ElasticsearchProperties"
+    },
+    {
+      "name": "elasticsearch.bulk-processor",
+      "type": "cn.gf.elasticsearch.autoconfigure.BulkProcessorProperties",
+      "sourceType": "cn.gf.elasticsearch.autoconfigure.BulkProcessorProperties"
+    }
+  ],
+  "properties": [
+    {
+      "name": "elasticsearch.host",
+      "type": "java.lang.String",
+      "sourceType": "cn.gf.elasticsearch.autoconfigure.ElasticsearchProperties",
+      "description": "host:port cluster use , separator.",
+      "defaultValue": "127.0.0.1:9200"
+    },
+    {
+      "name": "elasticsearch.connect-num",
+      "type": "java.lang.Integer",
+      "sourceType": "cn.gf.elasticsearch.autoconfigure.ElasticsearchProperties",
+      "description": "connectNum.",
+      "defaultValue": 10
+    },
+    {
+      "name": "elasticsearch.connect-per-route",
+      "type": "java.lang.Integer",
+      "sourceType": "cn.gf.elasticsearch.autoconfigure.ElasticsearchProperties",
+      "description": "connectPerRoute.",
+      "defaultValue": 50
+    },
+    {
+      "name": "elasticsearch.connect-timeout-millis",
+      "type": "java.lang.Integer",
+      "sourceType": "cn.gf.elasticsearch.autoconfigure.ElasticsearchProperties",
+      "description": "connectTimeoutMillis.",
+      "defaultValue": 1000
+    },
+    {
+      "name": "elasticsearch.socket-timeout-millis",
+      "type": "java.lang.Integer",
+      "sourceType": "cn.gf.elasticsearch.autoconfigure.ElasticsearchProperties",
+      "description": "socketTimeoutMillis.",
+      "defaultValue": 30000
+    },
+    {
+      "name": "elasticsearch.connection-request-timeout-millis",
+      "type": "java.lang.Integer",
+      "sourceType": "cn.gf.elasticsearch.autoconfigure.ElasticsearchProperties",
+      "description": "connectionRequestTimeoutMillis.",
+      "defaultValue": 500
+    },
+    {
+      "name": "elasticsearch.max-conn-pe-route",
+      "type": "java.lang.Integer",
+      "sourceType": "cn.gf.elasticsearch.autoconfigure.ElasticsearchProperties",
+      "description": "maxConnPerRoute.",
+      "defaultValue": 10
+    },
+    {
+      "name": "elasticsearch.max-conn-total",
+      "type": "java.lang.Integer",
+      "sourceType": "cn.gf.elasticsearch.autoconfigure.ElasticsearchProperties",
+      "description": "maxConnTotal.",
+      "defaultValue": 30
+    },
+    {
+      "name": "elasticsearch.log",
+      "type": "java.lang.Boolean",
+      "sourceType": "cn.gf.elasticsearch.autoconfigure.ElasticsearchProperties",
+      "description": "log.",
+      "defaultValue": true
+    },
+    {
+      "name": "elasticsearch.auth",
+      "type": "java.lang.Boolean",
+      "sourceType": "cn.gf.elasticsearch.autoconfigure.ElasticsearchProperties",
+      "description": "auth.",
+      "defaultValue": false
+    },
+    {
+      "name": "elasticsearch.username",
+      "type": "java.lang.String",
+      "sourceType": "cn.gf.elasticsearch.autoconfigure.ElasticsearchProperties",
+      "description": "username.",
+      "defaultValue": ""
+    },
+    {
+      "name": "elasticsearch.password",
+      "type": "java.lang.String",
+      "sourceType": "cn.gf.elasticsearch.autoconfigure.ElasticsearchProperties",
+      "description": "password.",
+      "defaultValue": ""
+    },
+    {
+      "name": "elasticsearch.pre-tag",
+      "type": "java.lang.String",
+      "sourceType": "cn.gf.elasticsearch.autoconfigure.ElasticsearchProperties",
+      "description": "preTag.",
+      "defaultValue": "「「「"
+    },
+    {
+      "name": "elasticsearch.post-tag",
+      "type": "java.lang.String",
+      "sourceType": "cn.gf.elasticsearch.autoconfigure.ElasticsearchProperties",
+      "description": "postTag.",
+      "defaultValue": "」」」"
+    },
+    {
+      "name": "elasticsearch.bulk-processor.batch-size",
+      "type": "java.lang.Integer",
+      "sourceType": "cn.gf.elasticsearch.autoconfigure.BulkProcessorProperties",
+      "description": "batchSize.",
+      "defaultValue": 10000
+    },
+    {
+      "name": "elasticsearch.bulk-processor.size",
+      "type": "java.lang.Long",
+      "sourceType": "cn.gf.elasticsearch.autoconfigure.BulkProcessorProperties",
+      "description": "size.",
+      "defaultValue": 8
+    },
+    {
+      "name": "elasticsearch.bulk-processor.byte-size-unit",
+      "type": "org.elasticsearch.common.unit.ByteSizeUnit",
+      "sourceType": "cn.gf.elasticsearch.autoconfigure.BulkProcessorProperties",
+      "description": "byteSizeUnit.",
+      "defaultValue": "MB"
+    },
+    {
+      "name": "elasticsearch.bulk-processor.concurrent-requests",
+      "type": "java.lang.Integer",
+      "sourceType": "cn.gf.elasticsearch.autoconfigure.BulkProcessorProperties",
+      "description": "concurrentRequests.",
+      "defaultValue": 8
+    },
+    {
+      "name": "elasticsearch.bulk-processor.max-number-of-retries",
+      "type": "java.lang.Integer",
+      "sourceType": "cn.gf.elasticsearch.autoconfigure.BulkProcessorProperties",
+      "description": "maxNumberOfRetries.",
+      "defaultValue": 3
+    },
+    {
+      "name": "elasticsearch.bulk-processor.fresh-time",
+      "type": "java.lang.Long",
+      "sourceType": "cn.gf.elasticsearch.autoconfigure.BulkProcessorProperties",
+      "description": "freshTime.",
+      "defaultValue": 10
+    },
+    {
+      "name": "elasticsearch.bulk-processor.fresh-time-unit",
+      "type": "cn.gf.elasticsearch.enums.TimeUnit",
+      "sourceType": "cn.gf.elasticsearch.autoconfigure.BulkProcessorProperties",
+      "description": "freshTimeUnit.",
+      "defaultValue": "S"
+    },
+    {
+      "name": "elasticsearch.bulk-processor.retry-time",
+      "type": "java.lang.Long",
+      "sourceType": "cn.gf.elasticsearch.autoconfigure.BulkProcessorProperties",
+      "description": "retryTime.",
+      "defaultValue": 3
+    },
+    {
+      "name": "elasticsearch.bul-processor.retry-time-unit",
+      "type": "cn.gf.elasticsearch.enums.TimeUnit",
+      "sourceType": "cn.gf.elasticsearch.autoconfigure.BulkProcessorProperties",
+      "description": "retryTimeUnit.",
+      "defaultValue": "S"
+    }
+  ],
+  "hints": [
+    {
+      "name": "elasticsearch.log",
+      "values": [
+        {
+          "value": true,
+          "description": "open init log print."
+        },
+        {
+          "value": false,
+          "description": "close init log print."
+        }
+      ]
+    },
+    {
+      "name": "elasticsearch.auth",
+      "values": [
+        {
+          "value": true,
+          "description": "use x-pack."
+        },
+        {
+          "value": false,
+          "description": "no user."
+        }
+      ]
+    }
+  ]
+}

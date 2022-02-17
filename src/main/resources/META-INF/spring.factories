@@ -1,0 +1,6 @@
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+  cn.gf.elasticsearch.autoconfigure.ElasticsearchProperties,\
+  cn.gf.elasticsearch.autoconfigure.BulkProcessorProperties,\
+  cn.gf.elasticsearch.conf.ElasticsearchConfig,\
+  cn.gf.elasticsearch.conf.ElasticsearchClientSpringFactory,\
+  cn.gf.elasticsearch.util.ElasticsearchUtils
