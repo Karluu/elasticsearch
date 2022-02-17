@@ -11,3 +11,5 @@ springboot结合elasticsearch的组件程序，可通过配置文件中elasticse
     </dependency>
 ```
 来使用功能。
+
+- 使用样例：https://github.com/Karluu/elasticsearch-demo
