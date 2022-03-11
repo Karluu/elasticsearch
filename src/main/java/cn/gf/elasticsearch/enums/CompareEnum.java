@@ -1,5 +1,7 @@
 package cn.gf.elasticsearch.enums;
 
+import cn.hutool.core.util.StrUtil;
+
 /**
  * Created by GuoFeng
  * Describe :
@@ -19,5 +21,18 @@ public enum CompareEnum {
 
     public String getType() {
         return type;
+    }
+
+    public static CompareEnum getCompareEnum(String compare) {
+        if (StrUtil.isEmpty(compare)) {
+            return null;
+        }
+        CompareEnum[] values = CompareEnum.values();
+        for (CompareEnum compareEnum : values) {
+            if (compareEnum.type.equals(compare)) {
+                return compareEnum;
+            }
+        }
+        return null;
     }
 }

@@ -17,5 +17,6 @@ public class StandardConstants {
     public static final String ARGUMENT_DATE_FIELD = "时间字段不能为空";
     public static final String SORT_TYPE = "当前暂时没有传入排序方式,默认升序排列";
     public static final String DATE_FORMAT = "yyyy-MM-dd HH:mm:ss";
+    public static final String COMPARE_ERROR = "比较符转换异常";
 
 }

@@ -3,16 +3,19 @@ package cn.gf.elasticsearch.util;
 import cn.gf.elasticsearch.autoconfigure.BulkProcessorProperties;
 import cn.gf.elasticsearch.autoconfigure.ElasticsearchProperties;
 import cn.gf.elasticsearch.dto.DataDTO;
-import cn.gf.elasticsearch.enums.CompareEnum;
-import cn.gf.elasticsearch.enums.FilterEnum;
-import cn.gf.elasticsearch.enums.SortEnum;
-import cn.gf.elasticsearch.enums.TimeUnit;
+import cn.gf.elasticsearch.dto.IndexDTO;
+import cn.gf.elasticsearch.dto.MappingsDTO;
+import cn.gf.elasticsearch.dto.VersionDTO;
+import cn.gf.elasticsearch.enums.*;
 import cn.gf.elasticsearch.msg.StandardConstants;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.http.HttpUtil;
+import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
+import cn.hutool.json.JSONUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.elasticsearch.action.ActionListener;
 import org.elasticsearch.action.DocWriteRequest;
@@ -45,6 +48,7 @@ import org.springframework.stereotype.Component;
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -107,6 +111,94 @@ public class ElasticsearchUtils {
         return builder.build();
     }
 
+    public VersionDTO version() {
+        String hostConfig = elasticsearchProperties.getHost();
+        if (StrUtil.isEmpty(hostConfig)) {
+            log.error("host config error");
+            return VersionDTO.builder().build();
+        }
+        String[] hosts = hostConfig.split(StandardConstants.SEPARATOR_COMMA);
+        for (String host : hosts) {
+            try {
+                String response = HttpUtil.get(String.format("http://%s", host), 5000);
+                JSONObject responseData = JSONUtil.parseObj(response);
+                String nodeName = responseData.getStr("name");
+                JSONObject versionData = responseData.getJSONObject("version");
+                if (JSONUtil.isNull(versionData)) {
+                    continue;
+                }
+                String version = versionData.getStr("number");
+                return VersionDTO.builder().nodeName(nodeName).version(version).build();
+            } catch (Exception e) {
+                log.error("this host [{}] error,continue get from next", host);
+            }
+        }
+        return VersionDTO.builder().build();
+    }
+
+    public List<IndexDTO> scanIndex() {
+        String hostConfig = elasticsearchProperties.getHost();
+        if (StrUtil.isEmpty(hostConfig)) {
+            log.error("host config error");
+            return new LinkedList<>();
+        }
+        String[] hosts = hostConfig.split(StandardConstants.SEPARATOR_COMMA);
+        for (String host : hosts) {
+            try {
+                String response = HttpUtil.get(String.format("http://%s/_cat/indices?h=index,status&format=json", host), 5000);
+                JSONArray object = JSONUtil.parseArray(response);
+                return object.toList(IndexDTO.class);
+            } catch (Exception e) {
+                log.error("this host [{}] error,continue get from next", host);
+            }
+        }
+        return new LinkedList<>();
+    }
+
+    public JSONObject scanSettings(String index) {
+        String hostConfig = elasticsearchProperties.getHost();
+        if (StrUtil.isEmpty(hostConfig)) {
+            log.error("host config error");
+            return new JSONObject();
+        }
+        String[] hosts = hostConfig.split(StandardConstants.SEPARATOR_COMMA);
+        for (String host : hosts) {
+            try {
+                String response = HttpUtil.get(String.format("http://%s/%s/_settings", host, index), 5000);
+                return JSONUtil.parseObj(response);
+            } catch (Exception e) {
+                log.error("this host [{}] error,continue get from next", host);
+            }
+        }
+        return new JSONObject();
+    }
+
+    public List<MappingsDTO> scanMappings(String index) {
+        String hostConfig = elasticsearchProperties.getHost();
+        if (StrUtil.isEmpty(hostConfig)) {
+            log.error("host config error");
+            return new LinkedList<>();
+        }
+        String[] hosts = hostConfig.split(StandardConstants.SEPARATOR_COMMA);
+        for (String host : hosts) {
+            try {
+                String response = HttpUtil.get(String.format("http://%s/%s/_mappings", host, index), 5000);
+                return mappings(JSONUtil.parseObj(response), index);
+            } catch (Exception e) {
+                log.error("this host [{}] error,continue get from next", host);
+            }
+        }
+        return new LinkedList<>();
+    }
+
+    public void columns(SearchSourceBuilder searchSourceBuilder, String... columns) {
+        searchSourceBuilder.fetchSource(columns, null);
+    }
+
+    public void terms(String field, String[] words, BoolQueryBuilder queryBuilder) {
+        queryBuilder.should(QueryBuilders.termsQuery(field, words));
+    }
+
     public void word(String field, String word, BoolQueryBuilder queryBuilder) {
         queryBuilder.must(QueryBuilders.matchPhraseQuery(field, word));
     }
@@ -114,6 +206,16 @@ public class ElasticsearchUtils {
     public void word(List<String> fields, String word, BoolQueryBuilder queryBuilder) {
         for (String field : fields) {
             word(field, word, queryBuilder);
+        }
+    }
+
+    public void wordTerm(String field, String word, BoolQueryBuilder queryBuilder) {
+        queryBuilder.must(QueryBuilders.termQuery(field, word));
+    }
+
+    public void wordTerm(List<String> fields, String word, BoolQueryBuilder queryBuilder) {
+        for (String field : fields) {
+            wordTerm(field, word, queryBuilder);
         }
     }
 
@@ -134,6 +236,16 @@ public class ElasticsearchUtils {
     public void prefixQuery(List<String> fields, String word, BoolQueryBuilder queryBuilder) {
         for (String field : fields) {
             prefixQuery(field, word, queryBuilder);
+        }
+    }
+
+    public void suffixQuery(String field, String word, BoolQueryBuilder queryBuilder) {
+        queryBuilder.must(QueryBuilders.wildcardQuery(field, String.format("*%s", word)));
+    }
+
+    public void suffixQuery(List<String> fields, String word, BoolQueryBuilder queryBuilder) {
+        for (String field : fields) {
+            suffixQuery(field, word, queryBuilder);
         }
     }
 
@@ -161,6 +273,25 @@ public class ElasticsearchUtils {
                     queryBuilder.filter(QueryBuilders.termsQuery(filter.getKey(), String.valueOf(value).split(StandardConstants.SEPARATOR_COMMA)));
             }
         }
+    }
+
+    public void range(String field, String start, String end, String leftCompare, String rightCompare, BoolQueryBuilder queryBuilder) {
+        if (StrUtil.isEmpty(field)) {
+            throw new IllegalArgumentException(StandardConstants.ARGUMENT_DATE_FIELD);
+        }
+        RangeQueryBuilder rangeQueryBuilder = QueryBuilders.rangeQuery(field);
+        CompareEnum leftCompareEnum = CompareEnum.getCompareEnum(leftCompare);
+        if (null != leftCompareEnum) {
+            rangeSet(leftCompareEnum, rangeQueryBuilder, start);
+        }
+        CompareEnum rightCompareEnum = CompareEnum.getCompareEnum(rightCompare);
+        if (null != rightCompareEnum) {
+            rangeSet(rightCompareEnum, rangeQueryBuilder, end);
+        }
+        if (StrUtil.isEmpty(start) && StrUtil.isEmpty(end)) {
+            throw new IllegalArgumentException(StandardConstants.ARGUMENT_DATE_FIELD);
+        }
+        queryBuilder.filter(rangeQueryBuilder);
     }
 
     public void date(String dateField, String start, String end, BoolQueryBuilder queryBuilder) {
@@ -489,7 +620,7 @@ public class ElasticsearchUtils {
 
     private UpdateRequest createUpdateRequest(DataDTO dataDTO, boolean single) {
         UpdateRequest updateRequest = new UpdateRequest(dataDTO.getIndex(), dataDTO.getType(), dataDTO.getId());
-        updateRequest.doc(dataDTO.toString(), XContentType.JSON);
+        updateRequest.doc(dataDTO.getData(), XContentType.JSON);
         if (single) {
             updateRequest.timeout(TimeUnit.S.getTime(1L));
             updateRequest.setRefreshPolicy(WriteRequest.RefreshPolicy.WAIT_UNTIL);
@@ -544,5 +675,76 @@ public class ElasticsearchUtils {
             throw new IllegalArgumentException("DataDTO id param can not be null");
         }
         return dataDTO;
+    }
+
+    private void rangeSet(CompareEnum compareEnum, RangeQueryBuilder rangeQueryBuilder, String word) {
+        switch (compareEnum) {
+            case LT:
+                rangeQueryBuilder.lt(word);
+                break;
+            case LTE:
+                rangeQueryBuilder.lte(word);
+                break;
+            case GT:
+                rangeQueryBuilder.gt(word);
+                break;
+            case GTE:
+                rangeQueryBuilder.gte(word);
+                break;
+            default:
+                log.error(StandardConstants.COMPARE_ERROR);
+        }
+    }
+
+    private List<MappingsDTO> mappings(JSONObject data, String index) {
+        VersionDTO version = version();
+        VersionEnum versionEnum = VersionEnum.versionEnum(version.getVersion());
+        if (null == versionEnum) {
+            return new LinkedList<>();
+        }
+        switch (versionEnum) {
+            case FIVE:
+                return commonFiveAndSix(data, index);
+            case SIX:
+                return commonFiveAndSix(data, index);
+            case SEVEN:
+                return seven(data, index);
+            default:
+                throw new IllegalArgumentException("can not get cluster version from param");
+        }
+    }
+
+    private List<MappingsDTO> commonFiveAndSix(JSONObject data, String index) {
+        JSONObject mappings = JSONUtil.getByPath(data, String.format("$.%s.mappings", index), JSONUtil.createObj());
+        Set<String> keySet = mappings.keySet();
+        List<MappingsDTO> result = new LinkedList<>();
+        for (String type : keySet) {
+            nest(JSONUtil.getByPath(mappings, String.format("$.%s.properties", type), JSONUtil.createObj()), result, type, false);
+        }
+        return result;
+    }
+
+    private List<MappingsDTO> seven(JSONObject data, String index) {
+        List<MappingsDTO> result = new LinkedList<>();
+        JSONObject mappings = JSONUtil.getByPath(data, String.format("$.%s.mappings.properties", index), JSONUtil.createObj());
+        nest(mappings, result, null, false);
+        return result;
+    }
+
+    private void nest(JSONObject mappings, List<MappingsDTO> result, String type, boolean nestFlag) {
+        Set<String> keys = mappings.keySet();
+        for (String key : keys) {
+            String fieldType = JSONUtil.getByPath(mappings, String.format("$.%s.type", key), "");
+            MappingsDTO mappingsDTO = MappingsDTO.builder().type(type).field(key).fieldType(fieldType).build();
+            List<MappingsDTO> nest = new LinkedList<>();
+            if (nestFlag) {
+                nest.add(mappingsDTO);
+            }
+            if ("nested".equals(type)) {
+                nest(JSONUtil.getByPath(mappings, String.format("$.%s.properties", key), JSONUtil.createObj()), nest, type, true);
+                mappingsDTO.setNest(nest);
+            }
+            result.add(mappingsDTO);
+        }
     }
 }
